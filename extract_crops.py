@@ -49,7 +49,7 @@ def crop_to_bbox(image, bbox, crop_margin=10):
 
     return image[y1:y2, x1:x2]
 
-dim_cropped_image = 250
+dim_cropped_image = 50
 for i in range(images.shape[0]):
     bbox = get_bounding_box(masks[i])
     image = crop_to_bbox(images[i], bbox, 20)
