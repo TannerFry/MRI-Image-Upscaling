@@ -155,8 +155,6 @@ if __name__ == "__main__":
             evaluate(model_path, x_testing, y_testing, loss)
 
     else:
-        #model = keras.models.load_model("CNN_models\\CNN_SSIM_and_MSE_model")
-
         print("Usage:\tpython3 CNN.py train <MSE | SSIM | SSIM_and_MSE | SSIM_then_MSE>\n\tpython3 CNN.py evaluate model_path <MSE | SSIM | SSIM_and_MSE | SSIM_then_MSE>")
 
 
