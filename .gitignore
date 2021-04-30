@@ -4,3 +4,4 @@ downscaled_cropped_images
 original_cropped_images
 balanced_dataset
 __pycache__
+.idea
