@@ -19,8 +19,8 @@ def plot(histories, prev):
     plt.ylabel('Validation Loss')
     plt.title('Number of Epochs vs Validation Loss')
     plt.legend()
-    #plt.grid()
-    plt.savefig('Plots/Validation/All_Loss_CNN.png')
+    plt.grid()
+    plt.savefig('Plots/Validation/All_Loss_CNN_grid.png')
     plt.show()
 
     # Plot all individually
@@ -33,8 +33,8 @@ def plot(histories, prev):
         plt.xlabel('Number of Epochs')
         plt.ylabel('Valdation Loss')
         plt.legend()
-        #plt.grid()
-        plt.savefig('Plots/Validation/' + names[i] + 'individual.png')
+        plt.grid()
+        plt.savefig('Plots/Validation/' + names[i] + 'individual_grid.png')
         plt.show()
         i = i + 1
 
@@ -50,8 +50,8 @@ def plot(histories, prev):
     plt.ylabel('Validation Loss')
     plt.title('Number of Epochs vs Validation Loss SSIM then MSE Sequential')
     plt.legend()
-    #plt.grid()
-    plt.savefig('Plots/Validation/' + names[3] + 'individual_distinct.png')
+    plt.grid()
+    plt.savefig('Plots/Validation/' + names[3] + 'individual_distinct_grid.png')
     plt.show()
 
 histories = []
@@ -65,8 +65,9 @@ for filename in os.listdir('Models'):
         if(filename == 'CNN_SSIM_then_MSE_model_history.txt'):
             prev = history
             h = history[0]
-            h['loss'].extend(history[1]['loss'])
+            h['val_loss'].extend(history[1]['val_loss'])
             history = h
+           
             
         histories.append(history)
     
