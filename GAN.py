@@ -111,6 +111,9 @@ def make_discriminator():
     return discriminator
 
 def make_gan(generator, discriminator):
+    # Make the weights in the discriminator not trainable
+    discriminator.trainable = False
+
     GAN=Sequential()
     GAN.add(generator)
     GAN.add(discriminator)
@@ -121,15 +124,16 @@ def make_gan(generator, discriminator):
     return GAN
 
 def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, epochs):
-    batch_size = 256
+    batch_size = 128
 
     #creating ground truth labels for discriminator
     valid = np.ones((batch_size))
     fake = np.zeros((batch_size))
-    y=np.concatenate((valid,fake))
+    y = np.concatenate((valid,fake))
 
     #training procedure
-    for i in range(epochs):
+    epoch = 0
+    for i in range(int((original_imgs.shape[0]/batch_size)) * epochs):
         #sample random images from training set
         idx = np.random.randint(0, original_imgs.shape[0], batch_size)
         imgs_orig = original_imgs[idx]
@@ -138,19 +142,32 @@ def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, epo
         imgs_down = downscaled_imgs[idy]
         imgs_predicted = generator.predict(imgs_down)
         #create training set minibatch
-        x=np.concatenate((imgs_orig, imgs_predicted))
+        x = np.concatenate((imgs_orig, imgs_predicted))
         #print(x.shape)
         #train discriminator
-        d_loss=discriminator.train_on_batch(x,y)
+        d_loss = discriminator.train_on_batch(x,y)
         #train generator (entire GAN)
         #idy = np.random.randint(0, downscaled_imgs.shape[0], batch_size)
         #imgs_down = downscaled_imgs[idy]
         g_loss = GAN.train_on_batch(imgs_down, valid)
-        print(f'Epoch {i+1}:')
-        print(f'discriminator loss: {d_loss[0]}    discriminator accuracy: {d_loss[1]}')
-        print(f'generator loss: {d_loss[0]}    generator accuracy: {d_loss[1]}')
-        print('=============================================================================')
+
         #print('{} d_loss: {}, g_loss{}'.format(i,d_loss,g_loss))
+
+        # Show losses and accuracies
+        if i % (int(original_imgs.shape[0]/batch_size)) == 0:
+            print(f'Epoch {epoch}:')
+            epoch += 1
+            print(f'discriminator loss: {d_loss[0]}    discriminator accuracy: {d_loss[1]}')
+            print(f'generator loss: {d_loss[0]}    generator accuracy: {d_loss[1]}')
+            print('=============================================================================')
+            #print('{} d_loss: {}, g_loss{}'.format(i,d_loss,g_loss))
+
+        if epoch % 100 == 0:
+            img_down = downscaled_imgs[0].reshape((1, 25, 25, 4))
+            new_img = generator.predict(img_down)
+            image = new_img[0, :, :, :]
+            filename = "pred_sample_" + str(epoch) + ".png"
+            plt.imsave(filename, image, cmap='bone')
 
     return generator, discriminator, GAN
 
@@ -186,8 +203,8 @@ def main():
     # Train the models, then save them
     generator, discriminator, GAN = train_gan(generator, discriminator, GAN, x_train, y_train, epochs)
     generator.save('generator_model')
-    discriminator.save('discriminator_model')
-    GAN.save('gan_model')
+    #discriminator.save('discriminator_model')
+    #GAN.save('gan_model')
 
     # Plotting predicted images
     n=10
@@ -198,11 +215,15 @@ def main():
         img_down = x_train[idy]
         new_img=generator.predict(img_down)
         image = new_img[0, :, :, :]
-        image = np.reshape(image, [50, 50, 4])
+        #image = np.reshape(image, [50, 50, 4])
         plt.imshow(image, cmap='bone')
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
     plt.show()
+
+    sample = x_test[1].reshape((1, 25, 25, 4))
+    test = generator.predict(sample)
+    plt.imsave("gan_pred_sample_0_1.png", test[0], cmap='bone')
 
 
 if __name__=='__main__':
