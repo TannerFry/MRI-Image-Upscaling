@@ -1,5 +1,5 @@
-# Takes the number of epochs to to train for as a command line argument.
-# Will automatically decide if there is a previously saved model that it should load to resume training on or if it needs to make the models.
+# Usage:    python3 GAN.py train epochs
+#           python3 GAN.py evaluate model_path
 
 from tensorflow.keras.layers import UpSampling2D, Lambda, Input, Dense, Reshape, Conv2DTranspose, BatchNormalization, ReLU, Activation, Conv2D, Flatten, Dropout, LeakyReLU
 from tensorflow.keras.models import Sequential, load_model
@@ -172,39 +172,40 @@ def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, epo
     return generator, discriminator, GAN
 
 def main():
-    if (len(sys.argv) < 2):
-        print('Please input the number of epochs you want the model to train for as a command line arg.')
+    if (len(sys.argv) != 3 or (sys.argv[1] != 'train' and sys.argv[1] != 'evaluate')):
+        print("Usage:\tpython3 GAN.py train epochs\n\tpython3 GAN.py evaluate model_path")
         return
-    epochs = int(sys.argv[1])
 
     # Load or create the models
-    try:
-        generator = load_model('generator_model')
-        discriminator = load_model('discriminator_model')
-        GAN = load_model('gan_model')
-
-        #Optimizer for discriminator (binary cross entropy)
-        #optimizer = optimizers.RMSprop(lr=0.0002, decay=6e-8)
-        #discriminator.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-
+    if sys.argv[1] == 'evaluate':
+        generator = load_model(sys.argv[2] + '/generator_model')
+        discriminator = load_model(sys.argv[2] + '/discriminator_model')
+        GAN = load_model(sys.argv[2]+ '/GAN_model')
         print('Loading models...done.')
-    except:
+
+        # Read the data
+        print('Reading data...', end='', flush=True)
+        x_train, x_val, x_test, y_train, y_val, y_test = read_data()
+        print('done.')
+
+    elif sys.argv[1] == 'train':
         print('Creating models...', end='', flush=True)
         generator = make_generator()
         discriminator = make_discriminator()
         GAN = make_gan(generator, discriminator)
         print('done.')
 
-    # Read the data
-    print('Reading data...', end='', flush=True)
-    x_train, x_val, x_test, y_train, y_val, y_test = read_data()
-    print('done.')
+        # Read the data
+        print('Reading data...', end='', flush=True)
+        x_train, x_val, x_test, y_train, y_val, y_test = read_data()
+        print('done.')
 
-    # Train the models, then save them
-    generator, discriminator, GAN = train_gan(generator, discriminator, GAN, x_train, y_train, epochs)
-    generator.save('generator_model')
-    #discriminator.save('discriminator_model')
-    #GAN.save('gan_model')
+        # Train the models, then save them
+        epochs = int(sys.argv[2])
+        generator, discriminator, GAN = train_gan(generator, discriminator, GAN, x_train, y_train, epochs)
+        generator.save('GAN_models/generator_model')
+        discriminator.save('GAN_models/discriminator_model')
+        GAN.save('GAN_models/GAN_model')
 
     # Plotting predicted images
     n=10
