@@ -123,8 +123,46 @@ def make_gan(generator, discriminator):
 
     return GAN
 
-def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, epochs):
+# Returns the score of the generator, calculated by taking the mean of the discriminator's prediction for each of the generator's generated images from the validation set
+def score_generator(generator, discriminator, x_val):
+    score = 0
+    for i in range(x_val.shape[0]):
+        gen_img = generator.predict(x_val[i].reshape((1, 25, 25, 4)))
+        score += discriminator.predict(gen_img)
+
+    return float(score / x_val.shape[0])
+
+# Returns the score of the discriminator, calculated by adding 1/2 the mean of the discriminator's predictions for each real image to 1/2 the mean of 1 - the discriminator's predictions for each generated image
+def score_discriminator(generator, discriminator, x_val, y_val):
+    scoreReal = 0
+    for i in range(y_val.shape[0]):
+        scoreReal += discriminator.predict(y_val[i].reshape((1, 50, 50, 4)))
+    scoreReal /= y_val.shape[0]
+
+    scoreGenerated = 0
+    for i in range(x_val.shape[0]):
+        gen_img = generator.predict(x_val[i].reshape((1, 25, 25, 4)))
+        scoreGenerated += 1 - discriminator.predict(gen_img)
+    scoreGenerated /= x_val.shape[0]
+
+    return float((scoreReal / 2) + (scoreGenerated / 2))
+
+# Plots the scores of the generator and the discriminator for each epoch
+def plot_scores(g_scores, d_scores):
+    #x = [*range(0, len(g_scores))]
+    plt.plot(g_scores, color='blue', label='Generator')
+    plt.plot(d_scores, color='red', label='Discriminator')
+    plt.xlabel('Number of Epochs')
+    plt.ylabel('Score')
+    plt.title('Number of Epochs vs Score')
+    plt.legend()
+    plt.show()
+
+def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, x_val, y_val, epochs):
     batch_size = 128
+
+    generator_scores = []
+    discriminator_scores = []
 
     #creating ground truth labels for discriminator
     valid = np.ones((batch_size))
@@ -143,18 +181,14 @@ def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, epo
         imgs_predicted = generator.predict(imgs_down)
         #create training set minibatch
         x = np.concatenate((imgs_orig, imgs_predicted))
-        #print(x.shape)
         #train discriminator
         d_loss = discriminator.train_on_batch(x,y)
         #train generator (entire GAN)
-        #idy = np.random.randint(0, downscaled_imgs.shape[0], batch_size)
-        #imgs_down = downscaled_imgs[idy]
         g_loss = GAN.train_on_batch(imgs_down, valid)
 
-        #print('{} d_loss: {}, g_loss{}'.format(i,d_loss,g_loss))
-
-        # Show losses and accuracies
+        # Every epoch...
         if i % (int(original_imgs.shape[0]/batch_size)) == 0:
+            # Show losses and accuracies
             print(f'Epoch {epoch}:')
             epoch += 1
             print(f'discriminator loss: {d_loss[0]}    discriminator accuracy: {d_loss[1]}')
@@ -162,6 +196,11 @@ def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, epo
             print('=============================================================================')
             #print('{} d_loss: {}, g_loss{}'.format(i,d_loss,g_loss))
 
+            # Calculate the scores of the generator and discriminator
+            generator_scores.append(score_generator(generator, discriminator, x_val))
+            discriminator_scores.append(score_discriminator(generator, discriminator, x_val, y_val))
+
+        # Every 100 epochs, store a generated image
         if epoch % 100 == 0:
             img_down = downscaled_imgs[0].reshape((1, 25, 25, 4))
             new_img = generator.predict(img_down)
@@ -169,6 +208,7 @@ def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, epo
             filename = "pred_sample_" + str(epoch) + ".png"
             plt.imsave(filename, image, cmap='bone')
 
+    plot_scores(generator_scores, discriminator_scores)
     return generator, discriminator, GAN
 
 def main():
@@ -202,7 +242,7 @@ def main():
 
         # Train the models, then save them
         epochs = int(sys.argv[2])
-        generator, discriminator, GAN = train_gan(generator, discriminator, GAN, x_train, y_train, epochs)
+        generator, discriminator, GAN = train_gan(generator, discriminator, GAN, x_train, y_train, x_val, y_val, epochs)
         generator.save('GAN_models/generator_model')
         discriminator.save('GAN_models/discriminator_model')
         GAN.save('GAN_models/GAN_model')
@@ -222,9 +262,9 @@ def main():
         ax.get_yaxis().set_visible(False)
     plt.show()
 
-    sample = x_test[1].reshape((1, 25, 25, 4))
-    test = generator.predict(sample)
-    plt.imsave("gan_pred_sample_0_1.png", test[0], cmap='bone')
+    #sample = x_test[1].reshape((1, 25, 25, 4))
+    #test = generator.predict(sample)
+    #plt.imsave("gan_pred_sample_0_1.png", test[0], cmap='bone')
 
 
 if __name__=='__main__':
