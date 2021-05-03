@@ -8,6 +8,8 @@ from tensorflow.keras import optimizers
 import os
 import balance_data
 import sys
+import time
+
 
 #function for reading in data for training/validation/testing
 #data pulled from cropped folders
@@ -129,23 +131,23 @@ def setup_model():
     model.add(layers.Flatten())
     model.add(layers.Dense(10000, activation='sigmoid'))  # output layer for gender
     model.add(layers.Reshape((50, 50, 4)))
-
     return model
 
 if __name__ == "__main__":
     #get data
     x_training, x_validation, x_testing, y_training, y_validation, y_testing = read_data()
 
-    #find best hyper-paramaters
-    #hyper_paramater_testing(model, x_training, x_validation, y_training, y_validation)
-
     #make sure 3 input args
     if len(sys.argv) == 3:
         #if first arg 1 is train, setup model for training based on loss setup given in arg 2
+        start = time.time()
         if sys.argv[1] == "train":
             loss = sys.argv[2]
             model = setup_model()
+
+            keras.utils.plot_model(model, to_file="CNN_architecture.png",show_shapes=True)
             train(model, x_training, x_validation, y_training, y_validation, loss)
+            print("Training Time: %s seconds" % (time.time() - start))
 
     elif len(sys.argv) == 4:
         #if arg 1 is evaluate, load model based on model path given in arg 2, store loss of model used

@@ -3,15 +3,12 @@
 
 from tensorflow.keras.layers import UpSampling2D, Lambda, Input, Dense, Reshape, Conv2DTranspose, BatchNormalization, ReLU, Activation, Conv2D, Flatten, Dropout, LeakyReLU
 from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.losses import binary_crossentropy
-from tensorflow.keras.utils import plot_model
-from tensorflow.keras import backend as K
 from tensorflow.keras import optimizers
-
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import os
+import time
 
 # Stop tensorflow from spamming me with info messages
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -229,6 +226,7 @@ def main():
         print('done.')
 
     elif sys.argv[1] == 'train':
+        start = time.time()
         print('Creating models...', end='', flush=True)
         generator = make_generator()
         discriminator = make_discriminator()
@@ -246,6 +244,7 @@ def main():
         generator.save('GAN_models/generator_model')
         discriminator.save('GAN_models/discriminator_model')
         GAN.save('GAN_models/GAN_model')
+        print("Training Time: %s seconds" % (time.time() - start))
 
     # Plotting predicted images
     n=10
@@ -261,10 +260,6 @@ def main():
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
     plt.show()
-
-    #sample = x_test[1].reshape((1, 25, 25, 4))
-    #test = generator.predict(sample)
-    #plt.imsave("gan_pred_sample_0_1.png", test[0], cmap='bone')
 
 
 if __name__=='__main__':
