@@ -116,7 +116,6 @@ def GAN_results(x_testing, y_testing):
 
     plt.show()
 
-
 #custom loss function using both MSE and SSIM where each is weighted
 def SSIM_and_MSE(y_true, y_pred):
     return 0.4 * keras.losses.mse(y_true, y_pred) + 0.6 * (1 - tf.reduce_mean(tf.image.ssim(y_true, y_pred, max_val=1)))
