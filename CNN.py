@@ -10,7 +10,6 @@ import balance_data
 import sys
 import time
 
-
 #function for reading in data for training/validation/testing
 #data pulled from cropped folders
 def read_data():
