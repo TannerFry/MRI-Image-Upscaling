@@ -62,8 +62,6 @@ def balance_data(x, y):
 
    return np.array(x_training), np.array(x_validation), np.array(x_testing), np.array(y_training), np.array(y_validation), np.array(y_testing)
 
-
-
 def balance_distribution():
    labels = np.load('./brain_tumor_dataset/labels.npy')
    images = np.load('./brain_tumor_dataset/images.npy', allow_pickle=True)
