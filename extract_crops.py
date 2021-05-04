@@ -58,9 +58,9 @@ for i in range(images.shape[0]):
     plt.imsave("downscaled_cropped_images/" + str(i) + ".png", image, cmap='bone')
 
 dim_cropped_image = 50
-    for i in range(images.shape[0]):
-        bbox = get_bounding_box(masks[i])
-        image = crop_to_bbox(images[i], bbox, 20)
-        image = cv2.resize(image, dsize=(dim_cropped_image, dim_cropped_image), interpolation=cv2.INTER_CUBIC)
-        plt.imshow(image, cmap='bone')
-        plt.imsave("original_cropped_images/" + str(i) + ".png", image, cmap='bone')
+for i in range(images.shape[0]):
+    bbox = get_bounding_box(masks[i])
+    image = crop_to_bbox(images[i], bbox, 20)
+    image = cv2.resize(image, dsize=(dim_cropped_image, dim_cropped_image), interpolation=cv2.INTER_CUBIC)
+    plt.imshow(image, cmap='bone')
+    plt.imsave("original_cropped_images/" + str(i) + ".png", image, cmap='bone')
