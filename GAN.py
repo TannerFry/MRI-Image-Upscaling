@@ -155,6 +155,7 @@ def plot_scores(g_scores, d_scores):
     plt.legend()
     plt.show()
 
+
 def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, x_val, y_val, epochs):
     batch_size = 128
 
@@ -208,6 +209,19 @@ def train_gan(generator, discriminator, GAN, downscaled_imgs, original_imgs, x_v
     plot_scores(generator_scores, discriminator_scores)
     return generator, discriminator, GAN
 
+#function for running trained model against testing data
+def evaluate(model, x_testing, y_testing):
+
+    eval_path = "GAN_models/testing_predictions/"
+    if not os.path.isdir(eval_path):
+        os.mkdir(eval_path)
+
+    #loop through and predict for all testing samples, save images to evaluation folder
+    for i in range(len(x_testing)):
+        sample = x_testing[i].reshape((1, 25, 25, 4))
+        pred = model.predict(sample)
+        plt.imsave(eval_path + "testing_sample_" + str(i) + ".png", pred[0], cmap='bone')
+
 def main():
     if (len(sys.argv) != 3 or (sys.argv[1] != 'train' and sys.argv[1] != 'evaluate')):
         print("Usage:\tpython3 GAN.py train epochs\n\tpython3 GAN.py evaluate model_path")
@@ -215,15 +229,10 @@ def main():
 
     # Load or create the models
     if sys.argv[1] == 'evaluate':
-        generator = load_model(sys.argv[2] + '/generator_model')
-        discriminator = load_model(sys.argv[2] + '/discriminator_model')
-        GAN = load_model(sys.argv[2]+ '/GAN_model')
-        print('Loading models...done.')
-
         # Read the data
-        print('Reading data...', end='', flush=True)
         x_train, x_val, x_test, y_train, y_val, y_test = read_data()
-        print('done.')
+        generator = load_model(sys.argv[2] + '/generator_model')
+        evaluate(generator, x_test, y_test)
 
     elif sys.argv[1] == 'train':
         start = time.time()
@@ -245,22 +254,6 @@ def main():
         discriminator.save('GAN_models/discriminator_model')
         GAN.save('GAN_models/GAN_model')
         print("Training Time: %s seconds" % (time.time() - start))
-
-    # Plotting predicted images
-    n=10
-    plt.figure(figsize=(20, 2))
-    for i in range(1,n):
-        ax = plt.subplot(1, n, i)
-        idy = np.random.randint(0, x_train.shape[0], 1)
-        img_down = x_train[idy]
-        new_img=generator.predict(img_down)
-        image = new_img[0, :, :, :]
-        #image = np.reshape(image, [50, 50, 4])
-        plt.imshow(image, cmap='bone')
-        ax.get_xaxis().set_visible(False)
-        ax.get_yaxis().set_visible(False)
-    plt.show()
-
 
 if __name__=='__main__':
     main()
