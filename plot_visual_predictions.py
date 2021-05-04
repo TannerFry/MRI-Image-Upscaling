@@ -58,27 +58,27 @@ def CNN_results(x_testing, y_testing):
             axes.set_yticks([])
             if i == 1:
                 if j == 2:
-                    axes.set_xlabel('X')
+                    axes.set_xlabel('X', fontsize=20)
                 plt.imshow(sample[0], cmap="bone")
             elif i == 2:
                 if j == 2:
-                    axes.set_xlabel('MSE')
+                    axes.set_xlabel('MSE', fontsize=20)
                 plt.imshow(pred1[0], cmap="bone")
             elif i == 3:
                 if j == 2:
-                    axes.set_xlabel('SSIM')
+                    axes.set_xlabel('SSIM', fontsize=20)
                 plt.imshow(pred2[0], cmap="bone")
             elif i == 4:
                 if j == 2:
-                    axes.set_xlabel('SSIM and MSE')
+                    axes.set_xlabel('SSIM and MSE', fontsize=20)
                 plt.imshow(pred3[0], cmap="bone")
             elif i == 5:
                 if j == 2:
-                    axes.set_xlabel('SSIM then MSE')
+                    axes.set_xlabel('SSIM then MSE', fontsize=20)
                 plt.imshow(pred4[0], cmap="bone")
             elif i == 6:
                 if j == 2:
-                    axes.set_xlabel('Y')
+                    axes.set_xlabel('Y', fontsize=20)
                 plt.imshow(y[0], cmap="bone")
 
 
@@ -103,15 +103,15 @@ def GAN_results(x_testing, y_testing):
             axes.set_yticks([])
             if i == 1:
                 if j == 2:
-                    axes.set_xlabel('X')
+                    axes.set_xlabel('X', fontsize=20)
                 plt.imshow(sample[0], cmap="bone")
             elif i == 2:
                 if j == 2:
-                    axes.set_xlabel('Prediction')
+                    axes.set_xlabel('Prediction', fontsize=20)
                 plt.imshow(pred1[0], cmap="bone")
             elif i == 3:
                 if j == 2:
-                    axes.set_xlabel('Y')
+                    axes.set_xlabel('Y', fontsize=20)
                 plt.imshow(y[0], cmap="bone")
 
     plt.show()
